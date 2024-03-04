@@ -22,13 +22,13 @@ class AzureConnection:
     
     if (extra_params is not None):
       params = { **params, **extra_params }
+      
+    x = requests.get(url, headers=headers, params=params)
     
-    print(url)
-    print(headers)
-    print(params)
-    
-    # resp = requests.get(url, headers=headers, params=params).json()
-    # return resp
+    return {
+      'json': x.json(),
+      'status_code': x.status_code
+    }
     
 
 class AzureDevops:
@@ -41,44 +41,25 @@ class AzureDevops:
     self.project_name = project_name
     self.wiki_name = f"{project_name}.wiki"
     PAT = f":{PAT}"
-    self.__auth2 = str2b64(PAT)
-    self.__auth = f"Basic {str2b64(PAT)}"
+    self.__auth = str2b64(PAT)
     
-    self.__conn = AzureConnection(auth=self.__auth2)
+    self.__conn = AzureConnection(auth=self.__auth)
     
     self.__pages = []
     
   def get_wiki_page_by_id(self, id:str, include_content=False):
     wiki_url = f"{self.organization_url}/{self.project_name}/_apis/wiki/wikis/{self.wiki_name}/pages/{id}"
-    headers = {
-      "Content-Type":"application/json",
-      "Authorization":self.__auth
-    }
-    params = {
-      "api-version":"7.1-preview.1",
-      "includeContent": include_content,
-    }
-    self.__conn.get(wiki_url, extra_params={ "includeContent": include_content })
-    resp = requests.get(wiki_url, headers=headers, params=params).json()
-    return resp
+    resp = self.__conn.get(wiki_url, extra_params={ "includeContent": include_content })
+    return resp['json']
     
-  
   def get_all_wiki_pages(self, recursive=False, include_content=False):
     wiki_url = f"{self.organization_url}/{self.project_name}/_apis/wiki/wikis/{self.wiki_name}/pages"
-    headers= {
-      "Content-Type":"application/json",
-      "Authorization":self.__auth
-    }
-    params={
-      "recursionLevel": "full" if recursive == True else "none",
-      "api-version":"7.1-preview.1"
-    }
-    resp = requests.get(wiki_url, headers=headers, params=params)
+    resp = self.__conn.get(wiki_url, extra_params={ "recursionLevel": "full" if recursive == True else "none" })
     
-    if resp.status_code != 200:
-      raise Exception(f"Respuesta inesperada.\n{resp.content}")
+    if resp['status_code'] != 200:
+      raise Exception(f"Respuesta inesperada.\n")
     
-    pages_resp = resp.json()
+    pages_resp = resp['json']
     
     self.__get_all_wiki_pages(pages_resp, include_content)
     
