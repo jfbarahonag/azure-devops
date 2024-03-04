@@ -14,21 +14,24 @@ class AzureConnection:
     }
   
   def get(self, url:str, extra_headers:dict|None=None, extra_params:dict|None=None):
-    headers = self.__headers.copy()
-    params = self.__params.copy()
-    
-    if (extra_headers is not None):
-      headers = { **headers, **extra_headers }
-    
-    if (extra_params is not None):
-      params = { **params, **extra_params }
+    try:
+      headers = self.__headers.copy()
+      params = self.__params.copy()
       
-    x = requests.get(url, headers=headers, params=params)
-    
-    return {
-      'json': x.json(),
-      'status_code': x.status_code
-    }
+      if (extra_headers is not None):
+        headers = { **headers, **extra_headers }
+      
+      if (extra_params is not None):
+        params = { **params, **extra_params }
+        
+      x = requests.get(url, headers=headers, params=params)
+      
+      return {
+        'json': x.json(),
+        'status_code': x.status_code
+      }
+    except:
+      print(f"Error fetching data from {url}")
     
 
 class AzureDevops:
@@ -50,7 +53,13 @@ class AzureDevops:
   def get_wiki_page_by_id(self, id:str, include_content=False):
     wiki_url = f"{self.organization_url}/{self.project_name}/_apis/wiki/wikis/{self.wiki_name}/pages/{id}"
     resp = self.__conn.get(wiki_url, extra_params={ "includeContent": include_content })
-    return resp['json']
+    page_dict = resp['json']
+    return {
+      'path': page_dict['path'],
+      'gitItemPath': page_dict['gitItemPath'],
+      'url': page_dict['url'],
+      'content': page_dict['content'] if page_dict is not None else None,
+    }
     
   def get_all_wiki_pages(self, recursive=False, include_content=False):
     wiki_url = f"{self.organization_url}/{self.project_name}/_apis/wiki/wikis/{self.wiki_name}/pages"
@@ -63,8 +72,7 @@ class AzureDevops:
     
     self.__get_all_wiki_pages(pages_resp, include_content)
     
-    for page in self.__pages:
-      print(self.get_wiki_page_by_id(page['path'], include_content))
+    return self.__pages.copy()
     
   def __get_all_wiki_pages(self, pages_dict: dict, include_content: bool):
     pages_dict = pages_dict.copy()
@@ -85,5 +93,5 @@ class AzureDevops:
       'path': pages_dict['path'],
       'gitItemPath': pages_dict['gitItemPath'],
       'url': pages_dict['url'],
-      'content': content_resp['content'] if content_resp is not None else None,
+      'content': content_resp['content'] if content_resp is not None else "",
     })
