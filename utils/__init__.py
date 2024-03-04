@@ -1,1 +1,1 @@
-from .azure_devops import AzureDevops
+from .azure.azure_devops import AzureDevops
