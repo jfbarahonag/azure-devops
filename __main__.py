@@ -1,0 +1,19 @@
+from utils import AzureDevops
+from os import getenv
+
+from dotenv import load_dotenv
+load_dotenv()
+
+def main():
+  ## Connection data
+  PAT = getenv('PAT') # admin token
+  organization_name = "jfbarahonagUN"
+  project_name = "Wiki"
+  
+  azure_devops = AzureDevops(organization_name, project_name, PAT)
+  
+  azure_devops.get_all_wiki_pages(recursive=True, include_content=True)
+  
+    
+if __name__ == '__main__':
+  main()
