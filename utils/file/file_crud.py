@@ -2,7 +2,7 @@ import os
 
 class FileCRUD:
     @staticmethod
-    def create(content, filepath, force=False):
+    def create(content, filepath, force=False, is_binary=False):
         directory = os.path.dirname(filepath)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -12,7 +12,7 @@ class FileCRUD:
         if os.path.isdir(filepath):
           return True
 
-        with open(filepath, 'w') as file:
+        with open(filepath, 'w' if is_binary is False else 'wb') as file:
             file.write(content)
 
         return True
