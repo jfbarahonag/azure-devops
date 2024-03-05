@@ -29,5 +29,5 @@ class AzureConnection:
         'json': x.json(),
         'status_code': x.status_code
       }
-    except:
-      print(f"Error fetching data from {url}")
+    except Exception as e:
+      raise Exception(f"Error fetching data from {url}")

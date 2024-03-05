@@ -12,11 +12,11 @@ def main():
   
   azure_devops = AzureDevops(organization_name, project_name, PAT)
   
-  wiki_pages = azure_devops.get_all_wiki_pages(recursive=True, include_content=True)
+  wiki_pages = azure_devops.get_wiki().get_all_wiki_pages(recursive=True, include_content=True)
   
   print(wiki_pages[0].items())
   print(
-    azure_devops.get_wiki_page_by_id(wiki_pages[0]['path'], include_content=True).items()
+    azure_devops.get_wiki().get_wiki_page_by_id(wiki_pages[0]['path'], include_content=True).items()
   )
   
     
