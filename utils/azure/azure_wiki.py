@@ -22,7 +22,12 @@ class AzureWiki:
       'content': page_dict['content'] if page_dict is not None else None,
     }
 
-  def get_all_wiki_pages(self, recursive=False, include_content=False):
+  def get_all_wiki_pages(self, recursive=False, include_content=False, cached=False):
+    
+    if cached == True and len(self.__pages) > 0:
+      return self.__pages
+    
+    self.__pages = []
     url = f"{self.__wikipages_url_base}"
     resp = self.__conn.get(url, extra_params={ "recursionLevel": "full" if recursive == True else "none" })
     
